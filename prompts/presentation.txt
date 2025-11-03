@@ -1,0 +1,56 @@
+You are creating a professional technical presentation of algorithm ideation results.
+
+Generate a comprehensive, well-structured markdown presentation with the following sections:
+
+# Algorithm Ideation Results
+
+## 1. Problem Statement
+{problem}
+
+## 2. Research Context Summary
+Summarize the key findings from research and relevant papers.
+
+## 3. Agent Proposals
+For each of the 3 agents, provide:
+- Agent specialization and approach taken
+- Key algorithmic insights
+- Complexity analysis
+- Evolution through reflection loops
+
+{agent_summaries}
+
+## 4. Comparative Evaluation
+Present the evaluation results in a clear table format:
+{evaluation_summary}
+
+## 5. Synthesis & Recommendations
+Based on the agent proposals and evaluations, provide:
+- **Best Overall Approach**: Which agent's idea is most promising and why?
+- **Hybrid Solution**: Can elements from multiple agents be combined for a superior solution?
+- **Key Insights**: What are 2-3 most important technical takeaways?
+- **Tradeoffs**: What are the key tradeoffs between the approaches?
+
+## 6. Implementation Roadmap
+Provide 3-5 concrete, actionable next steps for implementing the recommended approach:
+1. [Specific implementation step with details]
+2. [Next step]
+3. [Testing and validation step]
+...
+
+## 7. Open Questions & Future Work
+List 2-3 areas that need further investigation, refinement, or research.
+
+## 8. Conclusion
+Brief summary of the ideation process and recommended path forward.
+
+---
+*Generated on {timestamp} by Multi-Agent Ideation System v1.0*
+
+Requirements:
+- Use clear headings and hierarchical structure
+- Be concise but technically comprehensive
+- Focus on actionable insights and specific details
+- Maintain technical accuracy
+- Use markdown formatting effectively (bold, lists, tables, code blocks)
+- Include specific complexity analysis where relevant
+- Highlight novel contributions and insights

@@ -1,0 +1,33 @@
+You are critically evaluating your own algorithm proposal.
+
+Your Current Proposal:
+{current_idea}
+
+Task: Perform critical self-reflection and improve your algorithm.
+
+Evaluate these aspects:
+1. **Correctness**: Are there any logical flaws, bugs, or edge cases not properly handled?
+   - Check boundary conditions
+   - Verify algorithm logic
+   - Test against corner cases
+
+2. **Efficiency**: Can the time or space complexity be improved?
+   - Identify bottlenecks
+   - Consider alternative data structures
+   - Look for redundant operations
+
+3. **Clarity**: Is the explanation clear, well-structured, and complete?
+   - Check if steps are clearly defined
+   - Verify pseudocode correctness
+   - Ensure complexity analysis is accurate
+
+4. **Completeness**: Are there missing details, unstated assumptions, or gaps?
+   - List all assumptions explicitly
+   - Handle all input types
+   - Consider scalability
+
+Provide:
+1. **Critical Analysis**: Identify 2-3 specific weaknesses, flaws, or gaps in your current proposal
+2. **Improved Version**: An enhanced version of your algorithm that addresses these issues
+
+Focus on substantive improvements, not just rewording. Be specific about what changed and why.

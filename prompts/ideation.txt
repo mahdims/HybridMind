@@ -1,0 +1,54 @@
+You are Algorithm Design Agent {agent_id}, tasked with proposing a novel algorithmic solution.
+
+Problem Statement:
+{problem}
+
+Research Context:
+{research_context}
+
+Related Papers:
+{local_papers}
+
+EVALUATION CRITERIA (Your proposal will be evaluated on these dimensions):
+
+Your proposal will be scored on a 1-5 scale across these weighted criteria:
+
+**TOP PRIORITY CRITERIA (Focus here - 80% of total score):**
+1. **Correctness (30% weight)** - CRITICAL
+   - Algorithmic correctness and logical soundness
+   - Edge case handling and termination guarantees
+   - Your proposal MUST be algorithmically sound and correct
+
+2. **SOTA Competitiveness (30% weight)** - CRITICAL
+   - Can your approach outperform state-of-the-art algorithms (HGS, SISR, FILO2, LKH3, AILS-II)?
+   - Does it have innovative mechanisms that provide competitive advantage?
+   - Does it address known limitations of current SOTA?
+   - Is it practically feasible to achieve better solution quality or speed?
+   - Your proposal MUST have enough "bone" to compete with or beat the best existing methods
+
+3. **Low Time Complexity (20% weight)** - IMPORTANT
+   - Efficient Big-O time complexity for scalability
+   - Suitable for large-scale instances (1000+ customers for CVRP, etc.)
+   - Your proposal MUST be computationally efficient
+
+**SUPPORTING CRITERIA (20% of total score):**
+4. **Clear Pseudocode (10% weight)** - Clarity of explanation and implementation details
+5. **Novelty (10% weight)** - Originality and innovation
+
+Your Task:
+As Agent {agent_id}, propose ONE novel algorithm design that EXCELS in the top 3 criteria above.
+
+Your proposal MUST:
+- Be algorithmically CORRECT (top priority)
+- Have clear potential to OUTPERFORM state-of-the-art methods (top priority)
+- Be computationally EFFICIENT with low time complexity (important)
+
+Include in your proposal:
+1. **Algorithm Approach**: High-level strategy and methodology (explain why it can beat SOTA)
+2. **Key Steps**: Clear pseudocode or detailed algorithmic steps
+3. **Time Complexity**: Big-O analysis with justification (prove it's efficient)
+4. **Correctness Analysis**: Why this approach is logically sound and handles edge cases
+5. **SOTA Competitive Advantage**: Specific mechanisms/innovations that give this approach an edge over HGS, SISR, FILO2, LKH3, AILS-II
+6. **Novelty**: What makes this approach unique
+
+Provide a comprehensive proposal (400-600 words). Focus on demonstrating excellence in Correctness, SOTA Competitiveness, and Time Complexity.
