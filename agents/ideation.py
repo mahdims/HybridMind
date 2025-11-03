@@ -1,10 +1,7 @@
 """
 Ideation Agent - Generates algorithm ideas with self-reflection.
-Each agent uses a different LLM provider for diverse perspectives:
-- Agent 1: OpenAI GPT
-- Agent 2: Google Gemini
-- Agent 3: Anthropic Claude
-- Agent 4: Alibaba Qwen (with web search capability)
+Each agent uses a different SOTA language model for diverse perspectives.
+Supports up to 4 agents with varying capabilities including web search.
 """
 
 import os
@@ -111,14 +108,14 @@ def ideation_agent(state: Dict, agent_id: int, num_reflections: int = 3) -> Dict
     # Get the appropriate LLM for this agent
     llm = get_llm_for_agent(agent_id)
 
-    # Display which model is being used
-    model_names = {
-        1: "OpenAI GPT",
-        2: "Google Gemini",
-        3: "Anthropic Claude",
-        4: "Alibaba Qwen (with search)"
+    # Display agent initialization
+    agent_labels = {
+        1: "SOTA Agent 1",
+        2: "SOTA Agent 2 (with search)",
+        3: "SOTA Agent 3",
+        4: "SOTA Agent 4 (with search)"
     }
-    print(f"[Agent {agent_id}] Using {model_names.get(agent_id, 'Unknown')} model")
+    print(f"[SOTA Agent {agent_id}] Initializing {agent_labels.get(agent_id, f'Agent {agent_id}')}")
 
     # Prepare context
     problem = state.get("problem", "No problem specified")
@@ -138,7 +135,7 @@ def ideation_agent(state: Dict, agent_id: int, num_reflections: int = 3) -> Dict
         local_papers=papers_summary
     )
 
-    print(f"\n[Agent {agent_id}] Generating initial idea...")
+    print(f"\n[SOTA Agent {agent_id}] Generating initial idea...")
     initial_response = llm.invoke(idea_prompt)
     initial_idea = initial_response.content
 
@@ -147,7 +144,7 @@ def ideation_agent(state: Dict, agent_id: int, num_reflections: int = 3) -> Dict
     current_idea = initial_idea
 
     for i in range(num_reflections):
-        print(f"[Agent {agent_id}] Reflection loop {i + 1}/{num_reflections}...")
+        print(f"[SOTA Agent {agent_id}] Reflection loop {i + 1}/{num_reflections}...")
 
         # Load reflection prompt from template
         reflection_prompt = load_and_format_prompt(
@@ -165,7 +162,7 @@ def ideation_agent(state: Dict, agent_id: int, num_reflections: int = 3) -> Dict
         # Update current idea with improvements
         current_idea = reflection
 
-    print(f"[Agent {agent_id}] Completed {num_reflections} reflection loops")
+    print(f"[SOTA Agent {agent_id}] Completed {num_reflections} reflection loops")
 
     return {
         "agent_id": agent_id,

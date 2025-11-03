@@ -353,7 +353,7 @@ def main():
     for i, (name, _) in enumerate(examples, 1):
         print(f"  {i}. {name}")
 
-    print("\nNote: Most examples require at least one API key (OPENAI, GOOGLE, ANTHROPIC, or QWEN).")
+    print("\nNote: Most examples require at least one API key for SOTA Agents (see .env.example for options).")
     print("\nTo run all examples, uncomment the function calls below.")
     print("Or run individual examples by calling their functions.")
     print("\nRECOMMENDED: Try Example 7 (CVRP) for advanced optimization ideation!")

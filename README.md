@@ -5,7 +5,7 @@ A LangGraph-based multi-agent system where up to 4 independent agents, **each po
 ## 🎯 Overview
 
 This system implements a novel approach to algorithm design using multiple AI agents that:
-- **Use diverse AI models** (OpenAI GPT-4, Google Gemini, Anthropic Claude, Qwen) for varied perspectives
+- **Use diverse AI models** (4 different SOTA language models) for varied perspectives
 - **Execute in parallel** for maximum speed - 4 agents complete in the time of 1!
 - Generate diverse algorithmic solutions to complex problems
 - Self-reflect and refine ideas through iterative loops (3 iterations per agent)
@@ -19,16 +19,16 @@ This system implements a novel approach to algorithm design using multiple AI ag
 
 ## 🤖 Multi-Model Architecture
 
-**Each ideation agent uses a different LLM provider for maximum diversity:**
+**Each ideation agent uses a different SOTA language model for maximum diversity:**
 
-- **Agent 1**: OpenAI GPT - Generates unique algorithm perspective
-- **Agent 2**: Google Gemini - Generates unique algorithm perspective (supports search)
-- **Agent 3**: Anthropic Claude - Generates unique algorithm perspective
-- **Agent 4**: Alibaba Qwen - Generates unique algorithm perspective (with web search capability)
+- **Agent 1**: SOTA Agent 1 - Generates unique algorithm perspective
+- **Agent 2**: SOTA Agent 2 - Generates unique algorithm perspective (supports search)
+- **Agent 3**: SOTA Agent 3 - Generates unique algorithm perspective
+- **Agent 4**: SOTA Agent 4 - Generates unique algorithm perspective (with web search capability)
 
 **Evaluation & Presentation:**
-- **Evaluator**: Google Gemini - Fast, cost-effective multi-aspect evaluation
-- **Presenter**: Google Gemini - Efficient presentation generation
+- **Evaluator**: Specialized evaluation model - Fast, cost-effective multi-aspect evaluation
+- **Presenter**: Specialized presentation model - Efficient presentation generation
 
 **Flexible Agent Activation:**
 - Agents are activated based on available API keys
@@ -47,7 +47,7 @@ Input (Problem)
     ├──────────┬──────────┬──────────┐
     ↓          ↓          ↓          ↓
 [Agent 1]  [Agent 2]  [Agent 3]  [Agent 4]
-OpenAI     Gemini+S   Claude     Qwen+S
+SOTA-1     SOTA-2+S   SOTA-3     SOTA-4+S
   3 loops    3 loops    3 loops    3 loops
     │          │          │          │
     └──────────┴──────────┴──────────┘
@@ -72,10 +72,10 @@ Output (Markdown Report)
 
 - Python 3.8+
 - **At least ONE of the following API keys**:
-  - **OpenAI API key** (for Agent 1 - GPT-4) - Optional
-  - **Google API key** (for Agent 2 - Gemini) - Optional
-  - **Anthropic API key** (for Agent 3 - Claude) - Optional
-  - **Qwen API key** (for Agent 4 - Qwen with search) - Optional
+  - **API key for SOTA Agent 1** - Optional
+  - **API key for SOTA Agent 2** (with search) - Optional
+  - **API key for SOTA Agent 3** - Optional
+  - **API key for SOTA Agent 4** (with search) - Optional
 - (Optional) Tavily API key for enhanced research
 
 **Note**: The system requires at least ONE agent API key to function. Agents without API keys will be automatically disabled. More agents = more diverse perspectives!
@@ -111,10 +111,10 @@ cp .env.example .env
 
 # Edit .env and add at least ONE API key
 # Add as many as you want - more agents = more perspectives!
-#   - OPENAI_API_KEY (for Agent 1 - GPT-4)
-#   - GOOGLE_API_KEY (for Agent 2 - Gemini)
-#   - ANTHROPIC_API_KEY (for Agent 3 - Claude)
-#   - QWEN_API_KEY (for Agent 4 - Qwen with search)
+#   - OPENAI_API_KEY (for SOTA Agent 1)
+#   - GOOGLE_API_KEY (for SOTA Agent 2 with search)
+#   - ANTHROPIC_API_KEY (for SOTA Agent 3)
+#   - QWEN_API_KEY (for SOTA Agent 4 with search)
 ```
 
 **Getting API Keys:**
@@ -216,11 +216,11 @@ python main.py --non-interactive
 - Provides context for agent ideation
 
 ### 2. Ideation Agents (1-4 Agents with Different Models)
-Each agent uses a different LLM to naturally provide diverse perspectives:
-- **Agent 1**: OpenAI GPT (Optional)
-- **Agent 2**: Google Gemini with search support (Optional)
-- **Agent 3**: Anthropic Claude (Optional)
-- **Agent 4**: Alibaba Qwen with web search (Optional)
+Each agent uses a different SOTA language model to naturally provide diverse perspectives:
+- **Agent 1**: SOTA Agent 1 (Optional)
+- **Agent 2**: SOTA Agent 2 with search support (Optional)
+- **Agent 3**: SOTA Agent 3 (Optional)
+- **Agent 4**: SOTA Agent 4 with web search (Optional)
 
 **Flexible Agent Activation:**
 - System adapts to available API keys
@@ -239,7 +239,7 @@ Each agent:
 - Reduces groupthink and model-specific biases
 - Produces more creative and varied solutions
 
-### 3. Evaluation Judge (Google Gemini)
+### 3. Evaluation Judge
 Evaluates all agent proposals using **robust 1-5 Likert scale** across 5 dimensions:
 
 **Evaluation Dimensions (Weighted):**
@@ -402,10 +402,10 @@ The system supports up to 4 agents with automatic activation:
 **Issue**: `No API keys configured!`
 - **Solution**: Create `.env` file with at least ONE API key:
   ```
-  OPENAI_API_KEY=sk-...        # Optional - for Agent 1
-  GOOGLE_API_KEY=AI...         # Optional - for Agent 2
-  ANTHROPIC_API_KEY=sk-ant-... # Optional - for Agent 3
-  QWEN_API_KEY=sk-...          # Optional - for Agent 4
+  OPENAI_API_KEY=sk-...        # Optional - for SOTA Agent 1
+  GOOGLE_API_KEY=AI...         # Optional - for SOTA Agent 2
+  ANTHROPIC_API_KEY=sk-ant-... # Optional - for SOTA Agent 3
+  QWEN_API_KEY=sk-...          # Optional - for SOTA Agent 4
   ```
   Note: You only need ONE key minimum, but more agents = more perspectives!
 
@@ -450,14 +450,15 @@ If agents ran sequentially:
 **Speedup: 75% faster with parallel execution!**
 
 **Cost per run (approximate):**
-- Agent 1 (GPT-4): ~$0.40
-- Agent 2 (Gemini): ~$0.03
-- Agent 3 (Claude): ~$0.10
-- Evaluator (Gemini): ~$0.02
-- Presenter (Gemini): ~$0.01
-- **Total**: ~$0.55-0.60 per run (40% cheaper than all-GPT-4!)
+- SOTA Agent 1: ~$0.40
+- SOTA Agent 2: ~$0.03
+- SOTA Agent 3: ~$0.10
+- SOTA Agent 4: ~$0.05
+- Evaluator: ~$0.02
+- Presenter: ~$0.01
+- **Total**: ~$0.55-0.60 per run with all 4 agents
 
-**Note**: Performance varies by model. Gemini is typically faster and more cost-effective, while GPT-4 and Claude provide different reasoning patterns.
+**Note**: Performance varies by model. Different models have different speed, cost, and reasoning characteristics.
 
 ## 🔮 Future Enhancements
 
@@ -488,4 +489,4 @@ For questions or issues, please open a GitHub issue.
 ---
 
 **Generated by**: Algorithmic Multi-Agent Ideation System v1.0
-**Powered by**: LangGraph, OpenAI GPT, GPT Researcher
+**Powered by**: LangGraph, Multi-Model Architecture

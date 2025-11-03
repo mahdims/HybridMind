@@ -10,22 +10,22 @@ class Config:
     """System configuration settings."""
 
     # Multi-Model Configuration
-    # Agent 1: OpenAI
+    # SOTA Agent 1
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4")
     OPENAI_TEMPERATURE: float = float(os.getenv("OPENAI_TEMPERATURE", "0.7"))
 
-    # Agent 2: Google Gemini
+    # SOTA Agent 2
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-1.5-pro")
     GEMINI_TEMPERATURE: float = float(os.getenv("GEMINI_TEMPERATURE", "0.7"))
 
-    # Agent 3: Anthropic Claude
+    # SOTA Agent 3
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
     CLAUDE_MODEL: str = os.getenv("CLAUDE_MODEL", "claude-3-5-sonnet-20241022")
     CLAUDE_TEMPERATURE: float = float(os.getenv("CLAUDE_TEMPERATURE", "0.7"))
 
-    # Agent 4: Alibaba Qwen (OpenAI-compatible API)
+    # SOTA Agent 4 (with search capability)
     QWEN_API_KEY: str = os.getenv("QWEN_API_KEY", "")
     QWEN_MODEL: str = os.getenv("QWEN_MODEL", "qwen-plus")
     QWEN_BASE_URL: str = os.getenv("QWEN_BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1")
@@ -170,17 +170,13 @@ class Config:
 
         if not active_agents:
             print("ERROR: No API keys configured!")
-            print("\nPlease configure at least ONE of:")
-            print("  - OPENAI_API_KEY (for Agent 1 - GPT-4)")
-            print("  - GOOGLE_API_KEY (for Agent 2 - Gemini)")
-            print("  - ANTHROPIC_API_KEY (for Agent 3 - Claude)")
-            print("  - QWEN_API_KEY (for Agent 4 - Qwen with search)")
+            print("\nPlease configure at least ONE agent API key in .env file")
+            print("See .env.example for configuration options")
             return False
 
         print(f"\n✓ Active agents: {active_agents}")
         for agent_id in active_agents:
-            provider = cls.AGENT_MODELS[agent_id]['provider']
-            print(f"  Agent {agent_id}: {provider.capitalize()}")
+            print(f"  SOTA Agent {agent_id}: Ready")
 
         return True
 
@@ -204,13 +200,13 @@ class Config:
         """Print current configuration."""
         active_agents = cls.get_active_agents()
         print("\n" + "="*80)
-        print("SYSTEM CONFIGURATION - MULTI-MODEL SETUP")
+        print("SYSTEM CONFIGURATION - MULTI-AGENT SETUP")
         print("="*80)
-        print("\nAgent Models:")
-        print(f"  Agent 1 (OpenAI):    {cls.OPENAI_MODEL} (temp: {cls.OPENAI_TEMPERATURE})")
-        print(f"  Agent 2 (Gemini):    {cls.GEMINI_MODEL} (temp: {cls.GEMINI_TEMPERATURE})")
-        print(f"  Agent 3 (Claude):    {cls.CLAUDE_MODEL} (temp: {cls.CLAUDE_TEMPERATURE})")
-        print(f"  Agent 4 (Qwen):      {cls.QWEN_MODEL} (temp: {cls.QWEN_TEMPERATURE}, search: {cls.QWEN_ENABLE_SEARCH})")
+        print("\nAgent Configuration:")
+        print(f"  SOTA Agent 1: {cls.OPENAI_MODEL} (temp: {cls.OPENAI_TEMPERATURE})")
+        print(f"  SOTA Agent 2: {cls.GEMINI_MODEL} (temp: {cls.GEMINI_TEMPERATURE})")
+        print(f"  SOTA Agent 3: {cls.CLAUDE_MODEL} (temp: {cls.CLAUDE_TEMPERATURE})")
+        print(f"  SOTA Agent 4: {cls.QWEN_MODEL} (temp: {cls.QWEN_TEMPERATURE}, search: {cls.QWEN_ENABLE_SEARCH})")
         print(f"\nSystem Settings:")
         print(f"  Max Agents: {cls.MAX_AGENTS}")
         print(f"  Active Agents: {len(active_agents)} - {active_agents}")

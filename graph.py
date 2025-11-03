@@ -92,10 +92,10 @@ def build_workflow(enable_research: bool = True, enable_local_papers: bool = Tru
 
     # Agent name mapping
     agent_names = {
-        1: "OpenAI GPT",
-        2: "Google Gemini",
-        3: "Anthropic Claude",
-        4: "Alibaba Qwen (with search)"
+        1: "SOTA Agent 1",
+        2: "SOTA Agent 2 (with search)",
+        3: "SOTA Agent 3",
+        4: "SOTA Agent 4 (with search)"
     }
 
     # Dynamically create agent node functions for parallel execution
@@ -121,9 +121,9 @@ def build_workflow(enable_research: bool = True, enable_local_papers: bool = Tru
         agent_nodes[f"agent{agent_id}"] = create_agent_node(agent_id)
 
     def evaluation_node(state: IdeationState) -> Dict:
-        """Evaluate all agent ideas using Gemini."""
+        """Evaluate all agent ideas."""
         print("\n" + "="*80)
-        print(f"PHASE 3: MULTI-ASPECT EVALUATION (Google Gemini)")
+        print(f"PHASE 3: MULTI-ASPECT EVALUATION")
         print(f"Evaluating {len(state.get('agent_ideas', []))} agent proposals")
         print("="*80)
 
@@ -132,9 +132,9 @@ def build_workflow(enable_research: bool = True, enable_local_papers: bool = Tru
         return {"evaluations": evals}
 
     def presentation_node(state: IdeationState) -> Dict:
-        """Generate final presentation using Gemini."""
+        """Generate final presentation."""
         print("\n" + "="*80)
-        print(f"PHASE 4: PRESENTATION GENERATION (Google Gemini)")
+        print(f"PHASE 4: PRESENTATION GENERATION")
         print("="*80)
 
         pres = generate_presentation(state)
