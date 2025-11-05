@@ -37,6 +37,40 @@ This system implements a novel approach to algorithm design using multiple AI ag
 
 This multi-model approach ensures diverse perspectives from ideation agents while keeping evaluation and presentation cost-effective.
 
+## 🧬 Evolutionary Search Mode **NEW!**
+
+The system now supports **Evolutionary Search** - a population-based approach that evolves algorithm ideas over multiple generations!
+
+### Key Features
+
+- **Population Evolution**: Maintain 20 ideas that evolve over 10 generations (configurable)
+- **Three Operators**:
+  - **Mutation (70%)**: Refine ideas through reflection with different agent
+  - **Crossover (20%)**: Combine two parent ideas (5 prompt variants)
+  - **Fresh (10%)**: Generate new ideas for diversity (6 prompt variants)
+- **Agent Diversity**: Mutation/crossover always use **different agent** than creator
+- **Persistent Storage**: Each run creates `population_run_YYYYMMDD_HHMMSS.json`
+- **Continue Support**: Resume any previous evolution by name
+- **Elite Preservation**: Top 20% always survive to next generation
+
+### Quick Start
+
+```bash
+# Start new evolution
+python main.py --mode evolution --problem "Design CVRP algorithm..."
+
+# Continue latest
+python main.py --mode evolution --continue
+
+# Continue specific run
+python main.py --mode evolution --continue run_20250103_143052
+
+# List all populations
+python main.py --list-populations
+```
+
+**Configure via `parameters.txt`** - no code changes needed! See [EVOLUTIONARY_QUICK_START.md](EVOLUTIONARY_QUICK_START.md) for complete guide.
+
 ## 🏗️ Architecture
 
 ```
@@ -338,6 +372,81 @@ Example output structure:
 [Areas for future investigation]
 ```
 
+## 📦 Result Archiving
+
+**NEW!** Every run is automatically saved as a structured JSON file in the `archive/` directory for historical tracking and analysis.
+
+### Automatic Archiving
+
+By default, each run creates a JSON archive with:
+
+- Complete problem statement and configuration
+- All agent ideas with reflection history
+- Evaluation scores and detailed feedback
+- Rankings and weighted scores
+- Metadata and timestamps
+
+Archive files are named: `run_YYYYMMDD_HHMMSS.json`
+
+### Viewing Archived Results
+
+**List all archived runs:**
+
+```bash
+python view_archive.py --list
+```
+
+**Show summary of a specific run:**
+
+```bash
+python view_archive.py --summary run_20250103_143052
+```
+
+**Show full details:**
+
+```bash
+python view_archive.py --details run_20250103_143052
+```
+
+**Export run to markdown:**
+
+```bash
+python view_archive.py --export run_20250103_143052
+```
+
+**Compare two runs:**
+
+```bash
+python view_archive.py --compare run_20250103_143052 run_20250103_150230
+```
+
+### Disable Archiving
+
+To disable automatic archiving:
+
+```bash
+python main.py --no-archive
+```
+
+Or in code:
+
+```python
+run_ideation_system(
+    problem="Your problem...",
+    enable_archiving=False
+)
+```
+
+### Benefits
+
+- **Historical Tracking**: Review all past ideation runs
+- **Comparison**: Compare different approaches to similar problems
+- **Analytics**: Analyze agent performance over time
+- **Reproducibility**: Complete record of inputs and outputs
+- **Knowledge Base**: Build a library of algorithmic solutions
+
+See [archive/README.md](archive/README.md) for detailed JSON schema documentation.
+
 ## ⚙️ Configuration
 
 Edit `config.py` or `.env` to customize:
@@ -421,6 +530,30 @@ The system supports up to 4 agents with automatic activation:
 
 **Issue**: GPT Researcher errors
 - **Solution**: Install additional dependencies or disable research with `--no-research`
+
+**Issue**: Local PDF papers not loading (empty `*_research.txt` file)
+
+- **Solution**: Install PDF loading dependencies:
+
+  ```bash
+  pip install langchain-community
+  pip install "unstructured[pdf]"
+  ```
+
+- **Verify**: Check that PDF files exist in `data/papers/` directory
+- **Alternative**: Run with `--no-papers` to disable local paper loading
+
+**Issue**: Some PDFs fail with "tesseract is not installed" error
+
+- **Background**: Some PDFs (especially scanned papers) require OCR (Optical Character Recognition)
+- **Solution Option 1** (Install tesseract - best quality):
+  - **Windows**: Download from <https://github.com/UB-Mannheim/tesseract/wiki>
+  - **macOS**: `brew install tesseract`
+  - **Linux**: `sudo apt-get install tesseract-ocr`
+- **Solution Option 2** (Skip problematic PDFs):
+  - The system will load successful PDFs and skip failed ones
+  - Remove or move problematic PDFs from `data/papers/` directory
+- **Note**: System continues with successfully loaded papers even if some fail
 
 **Issue**: Token limit exceeded
 - **Solution**: Reduce `NUM_REFLECTIONS` or use shorter problem statements

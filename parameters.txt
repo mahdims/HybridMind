@@ -1,0 +1,94 @@
+# ============================================================================
+# Evolutionary Search Parameters
+# ============================================================================
+# Edit these values to control the evolutionary algorithm behavior.
+# All parameters can be overridden via command line arguments.
+# ============================================================================
+
+[Population]
+# Initial number of ideas to generate (using all available agents)
+initial_population_size = 10
+
+# Maximum population size to maintain across generations
+max_population_size = 10
+
+# Ratio of top individuals to preserve as elites (0.0-1.0)
+# Example: 0.20 means top 20% are always kept
+elite_ratio = 0.35
+
+
+[Reproduction]
+# Ratio of offspring from mutation (refinement of existing ideas)
+# Mutation uses reflection loops to improve a single parent idea
+mutation_ratio = 0.35
+
+# Ratio of offspring from crossover (combining two parent ideas)
+# Crossover merges strengths from two high-fitness parents
+crossover_ratio = 0.5
+
+# Ratio of completely fresh ideas (new generation from scratch)
+# Fresh ideas maintain diversity and prevent premature convergence
+fresh_ratio = 0.15
+
+# NOTE: mutation_ratio + crossover_ratio + fresh_ratio should equal 1.0
+
+
+[Evolution]
+# Maximum number of generations to evolve
+max_generations = 5
+
+# Number of reflection loops for mutation and fresh generation
+# More reflections = better quality but slower
+num_reflections = 3
+
+
+[Selection]
+# Method for selecting parents: 'tournament', 'roulette', or 'rank'
+parent_selection_method = tournament
+
+# Number of candidates in tournament selection (only used if method=tournament)
+tournament_size = 3
+
+
+[Agents]
+# Number of SOTA agents to use (1-4, based on available API keys)
+# System auto-detects active agents from .env configuration
+num_agents = 4
+
+# Enforce that mutation/crossover uses DIFFERENT agent than original creator
+# This increases diversity and prevents same-model bias
+enforce_agent_diversity = true
+
+
+[Evaluation]
+# Number of individuals to evaluate together in one API call
+# Batch evaluation enables relative comparison and reduces API costs
+# Recommended: Set equal to max_population_size for best comparison
+batch_size = 10
+
+
+[Output]
+# Number of top ideas to show in final summary
+top_k_ideas = 4
+
+# Generate detailed presentation markdown
+generate_presentation = true
+
+
+[Diversity]
+# Future: Diversity maintenance strategies
+# maintain_diversity = true
+# diversity_threshold = 0.3
+# niching_enabled = false
+
+
+# ============================================================================
+# Notes:
+# ============================================================================
+# - All ratios should be between 0.0 and 1.0
+# - Reproduction ratios should sum to 1.0
+# - Elite ratio determines how many top ideas are preserved unchanged
+# - Agent diversity ensures different perspectives on the same idea
+# - Increase num_reflections for better quality (but slower evolution)
+# - Decrease max_generations for faster runs (but less refinement)
+# ============================================================================

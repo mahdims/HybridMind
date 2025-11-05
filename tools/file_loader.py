@@ -1,24 +1,155 @@
 """
 File Loader - Local PDF Paper Loader
 Loads and chunks local PDF papers for context in ideation.
+Includes LLM-based summarization using Gemini 2.5 Flash for comprehensive paper understanding.
 """
 
 import os
 from typing import List, Dict
 from langchain_community.document_loaders import DirectoryLoader, UnstructuredPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 
-def load_local_papers(directory: str = "./data/papers", chunk_size: int = 2000) -> List[str]:
+def summarize_paper_with_gemini(paper_content: str, paper_name: str) -> str:
     """
-    Load and chunk local PDF papers.
+    Summarize a research paper using Gemini 2.0 Flash with focus on algorithmic mechanisms.
+
+    Args:
+        paper_content: Full text content of the paper (up to ~70K tokens / 280K chars)
+        paper_name: Name of the paper file for logging
+
+    Returns:
+        Algorithm-focused summary (target: 3500-4000 chars, max: 4000) with detailed
+        component descriptions, interactions, and pseudocode
+    """
+    try:
+        # Initialize Gemini 2.0 Flash (fast and cost-effective for summarization)
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-2.0-flash-exp",  # Using Gemini 2.0 Flash
+            temperature=0.1,  # Low temperature for factual summarization
+            max_output_tokens=5000  # Target 4000 chars (~1000 tokens)
+        )
+
+        # Create summarization prompt focused on algorithmic mechanisms and details
+        summarization_prompt = f"""You are an algorithm analysis expert extracting algorithmic details from research papers.
+
+Your task: Extract and explain the ALGORITHMIC MECHANISMS from this paper in detail.
+
+**TARGET LENGTH: 3500-4000 characters (STRICT MAXIMUM: 4000 characters)**
+
+**WHAT TO FOCUS ON (Priority Order):**
+
+1. **Algorithm Components & Mechanisms** (HIGHEST PRIORITY - ~40% of content)
+   - What are the key algorithmic components/modules?
+   - How does each component work internally (mechanism)?
+   - What specific operations does each component perform?
+   - What data structures are used in each component?
+
+2. **Component Interactions** (CRITICAL - ~25% of content)
+   - How do components interact with each other?
+   - What information/data flows between components?
+   - What is the execution order and control flow?
+   - How do components communicate or coordinate?
+
+3. **Pseudocode** (ESSENTIAL - ~20% of content)
+   - Extract or reconstruct the main algorithm pseudocode
+   - Include critical subroutines if essential
+   - Show actual algorithmic steps with clarity
+
+4. **Technical Details** (~10% of content)
+   - Key parameters and their roles
+   - Mathematical formulations (only if essential to understanding mechanism)
+   - Complexity analysis (one sentence)
+
+5. **Performance Observation** (~5% of content)
+   - ONE general sentence: "outperforms X using Y mechanism" or "comparable to X"
+
+**WHAT TO MINIMIZE OR SKIP:**
+
+- ❌ Problem description (we already know the problem)
+- ❌ Detailed experimental setup
+- ❌ Benchmark instance descriptions
+- ❌ Detailed performance numbers and tables
+- ❌ Literature review or background
+- ❌ Author names, paper metadata, citations
+
+**OUTPUT STRUCTURE:**
+
+## Main Algorithm
+[Algorithm name and 1-sentence description of main idea]
+
+## Core Components
+[For each component: name, what it does, how it works internally, what operations it performs]
+
+## Component Interactions & Flow
+[How components work together, data/information flow between them, execution sequence, coordination mechanisms]
+
+## Pseudocode
+```
+[Main algorithm pseudocode - be detailed and specific]
+[Include key subroutines if critical]
+```
+
+## Technical Mechanisms
+[Data structures, key parameters, essential mathematical details]
+
+## Performance Note
+[One general sentence about performance]
+
+---
+
+**PAPER CONTENT:**
+
+{paper_content[:280000]}
+
+---
+
+**CRITICAL CONSTRAINTS:**
+- Length: 3500-4000 characters (STRICT MAXIMUM: 4000)
+- Focus: 90% on algorithmic mechanisms, components, and their interactions
+- Include: Detailed pseudocode with specific steps
+- Minimize: problem description, experiments, performance details"""
+
+        print(f"    Summarizing with Gemini 2.5 Flash...", end=" ")
+
+        # Get summary from Gemini
+        response = llm.invoke(summarization_prompt)
+        summary = response.content
+
+        summary_length = len(summary)
+        print(f"✓ ({summary_length:,} chars)")
+
+        # Warn if summary is significantly shorter than target
+        if summary_length < 2500:
+            print(f"    ⚠️  WARNING: Summary shorter than expected (target: 3500-4000 chars)")
+
+        return summary
+
+    except Exception as e:
+        error_msg = str(e)
+        print(f"❌ Summarization failed: {error_msg[:100]}")
+
+        # Fallback: return original content truncated
+        print(f"    📋 Falling back to raw content extraction")
+        return paper_content[:20000]
+
+
+def load_local_papers(
+    directory: str = "./data/papers",
+    chunk_size: int = 280000,
+    use_summarization: bool = True
+) -> List[str]:
+    """
+    Load local PDF papers with comprehensive content extraction and optional LLM summarization.
 
     Args:
         directory: Path to directory containing PDF files
-        chunk_size: Maximum characters per chunk
+        chunk_size: Maximum characters per paper (default: 280000 for ~70K tokens)
+        use_summarization: If True, use Gemini 2.5 Flash to summarize papers (default: True)
 
     Returns:
-        List of text chunks from all papers
+        List of paper contents (summaries if use_summarization=True, raw content otherwise)
     """
     try:
         # Check if directory exists
@@ -33,33 +164,81 @@ def load_local_papers(directory: str = "./data/papers", chunk_size: int = 2000) 
             print(f"No PDF files found in {directory}")
             return []
 
-        print(f"Loading {len(pdf_files)} PDF files from {directory}...")
+        if use_summarization:
+            print(f"Loading {len(pdf_files)} PDF files from {directory}...")
+            print("📚 Using Gemini 2.5 Flash for intelligent summarization (algorithm-focused)")
+        else:
+            print(f"Loading {len(pdf_files)} PDF files from {directory} (raw extraction)...")
 
-        # Load PDFs
-        loader = DirectoryLoader(
-            directory,
-            glob="**/*.pdf",
-            loader_cls=UnstructuredPDFLoader,
-            show_progress=True
-        )
-        docs = loader.load()
-
-        if not docs:
-            print("No documents loaded")
-            return []
-
-        # Simple chunking - take first chunk_size characters from each document
+        # Load PDFs individually to handle failures gracefully
         chunks = []
-        for doc in docs:
-            content = doc.page_content[:chunk_size]
-            if content.strip():
-                chunks.append(content)
+        successful = 0
+        failed = 0
+        failed_files = []
 
-        print(f"Loaded {len(chunks)} chunks from papers")
+        for pdf_file in pdf_files:
+            try:
+                pdf_path = os.path.join(directory, pdf_file)
+                print(f"  Loading {pdf_file}...", end=" ")
+
+                loader = UnstructuredPDFLoader(pdf_path)
+                docs = loader.load()
+
+                if docs:
+                    # Concatenate all document parts (for multi-page PDFs)
+                    full_content = ""
+                    for doc in docs:
+                        full_content += doc.page_content + "\n\n"
+
+                    # Take substantial content (up to chunk_size, default 280K chars for ~70K tokens)
+                    raw_content = full_content[:chunk_size].strip()
+                    char_count = len(raw_content)
+                    print(f"✓ ({char_count:,} chars extracted)")
+
+                    if raw_content:
+                        # Use LLM summarization if enabled
+                        if use_summarization:
+                            summary = summarize_paper_with_gemini(raw_content, pdf_file)
+                            chunks.append(summary)
+                            successful += 1
+                        else:
+                            # Use raw content
+                            chunks.append(raw_content)
+                            successful += 1
+                    else:
+                        print("⚠️ No content extracted")
+                        failed += 1
+                        failed_files.append((pdf_file, "No content extracted"))
+                else:
+                    print("⚠️ No content extracted")
+                    failed += 1
+                    failed_files.append((pdf_file, "No content extracted"))
+
+            except Exception as e:
+                print(f"❌ Failed: {str(e)[:50]}")
+                failed += 1
+                failed_files.append((pdf_file, str(e)))
+
+        print(f"\n✓ Successfully loaded {successful}/{len(pdf_files)} PDF files")
+        if use_summarization:
+            print(f"✓ Generated {len(chunks)} AI-powered summaries (algorithm-focused)")
+        else:
+            print(f"✓ Extracted {len(chunks)} raw content chunks from papers")
+
+        if failed > 0:
+            print(f"\n⚠️ Failed to load {failed} files:")
+            for filename, error in failed_files:
+                print(f"  - {filename}: {error[:60]}")
+
+            if "tesseract" in str(failed_files).lower():
+                print(f"\n💡 TIP: Some PDFs require tesseract (OCR tool)")
+                print(f"   Install: https://github.com/tesseract-ocr/tesseract")
+                print(f"   Or skip problematic PDFs and use what loaded successfully")
+
         return chunks
 
     except Exception as e:
-        print(f"Error loading local papers: {str(e)}")
+        print(f"Error in PDF loading system: {str(e)}")
         return []
 
 

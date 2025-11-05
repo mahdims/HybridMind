@@ -43,6 +43,12 @@ output/
 *.md
 !README.md
 
+# Research cache files
+*_research.txt
+
+# Population (keep structure, ignore population JSON files)
+population/population_*.json
+
 # Data
 data/papers/*.pdf
 

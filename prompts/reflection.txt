@@ -26,8 +26,51 @@ Evaluate these aspects:
    - Handle all input types
    - Consider scalability
 
-Provide:
-1. **Critical Analysis**: Identify 2-3 specific weaknesses, flaws, or gaps in your current proposal
-2. **Improved Version**: An enhanced version of your algorithm that addresses these issues
+================================================================================
+OUTPUT FORMAT - FOLLOW EXACTLY (MANDATORY)
+================================================================================
 
-Focus on substantive improvements, not just rewording. Be specific about what changed and why.
+You MUST provide your response in this EXACT two-section format:
+
+---FLAWS---
+[List 2-3 specific weaknesses, flaws, or gaps in the current proposal. Be concise and specific. This section is for analysis only.]
+
+---REVISED_ALGORITHM---
+[Provide the COMPLETE improved version of the algorithm that addresses the identified flaws. This should be a self-contained, standalone algorithm description that can be understood without reading the flaws section. Include all necessary details: approach, pseudocode, complexity analysis, and explanations.]
+
+CRITICAL REQUIREMENTS:
+1. Start flaws section with EXACTLY "---FLAWS---" on its own line
+2. Start revised algorithm section with EXACTLY "---REVISED_ALGORITHM---" on its own line
+3. The revised algorithm section must be COMPLETE and STANDALONE
+4. Do NOT reference the flaws section in the revised algorithm
+5. Do NOT say "as mentioned above" or "to address the issues" in the revised algorithm
+6. The revised algorithm should be a polished, final version ready for evaluation
+7. Focus on substantive improvements, not just rewording
+
+EXAMPLE FORMAT:
+
+---FLAWS---
+1. The current approach doesn't handle negative numbers in the input array, which could lead to incorrect results.
+2. The time complexity analysis assumes uniform distribution, but worst-case scenarios aren't addressed.
+3. The pseudocode lacks clear handling of the base case when the array is empty.
+
+---REVISED_ALGORITHM---
+**Enhanced Binary Search with Comprehensive Edge Case Handling**
+
+**Approach:**
+This algorithm implements an optimized binary search that handles all edge cases including negative numbers, empty arrays, and duplicate values...
+
+[Complete algorithm description follows...]
+
+**Pseudocode:**
+```
+function binarySearch(arr, target):
+    if arr is empty:
+        return -1
+    ...
+```
+
+**Time Complexity:** O(log n) in all cases...
+**Space Complexity:** O(1)...
+
+================================================================================

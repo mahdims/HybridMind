@@ -45,8 +45,9 @@ def generate_presentation(state: Dict) -> str:
     agent_summaries = ""
     for idea in agent_ideas:
         agent_id = idea.get("agent_id", "Unknown")
-        initial = idea.get("initial_idea", "N/A")[:500]
-        final = idea.get("final_idea", "N/A")[:800]
+        # IMPORTANT: NO TRUNCATION - Algorithm proposals must be complete
+        initial = idea.get("initial_idea", "N/A")  # Full content
+        final = idea.get("final_idea", "N/A")      # Full content
         num_reflections = len(idea.get("reflections", []))
 
         agent_summaries += f"""

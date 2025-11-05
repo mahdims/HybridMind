@@ -3,6 +3,8 @@ Configuration settings for the Algorithmic Multi-Agent Ideation System.
 """
 
 import os
+import configparser
+from pathlib import Path
 from typing import Dict, Any, List
 
 
@@ -135,6 +137,101 @@ class Config:
 
     # Logging
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+
+    # Evolutionary Parameters (loaded from parameters.txt)
+    EVOLUTIONARY_PARAMS: Dict[str, Any] = {}
+
+    @classmethod
+    def load_evolutionary_parameters(cls, params_file: str = "parameters.txt") -> Dict[str, Any]:
+        """
+        Load evolutionary algorithm parameters from parameters.txt file.
+
+        Args:
+            params_file: Path to parameters file
+
+        Returns:
+            Dictionary with all evolutionary parameters
+        """
+        params_path = Path(params_file)
+
+        if not params_path.exists():
+            print(f"⚠️  Warning: {params_file} not found. Using default parameters.")
+            return cls._get_default_evolutionary_parameters()
+
+        config = configparser.ConfigParser()
+        config.read(params_path)
+
+        try:
+            params = {
+                # Population
+                "initial_population_size": config.getint("Population", "initial_population_size", fallback=20),
+                "max_population_size": config.getint("Population", "max_population_size", fallback=20),
+                "elite_ratio": config.getfloat("Population", "elite_ratio", fallback=0.20),
+
+                # Reproduction
+                "mutation_ratio": config.getfloat("Reproduction", "mutation_ratio", fallback=0.70),
+                "crossover_ratio": config.getfloat("Reproduction", "crossover_ratio", fallback=0.20),
+                "fresh_ratio": config.getfloat("Reproduction", "fresh_ratio", fallback=0.10),
+
+                # Evolution
+                "max_generations": config.getint("Evolution", "max_generations", fallback=10),
+                "num_reflections": config.getint("Evolution", "num_reflections", fallback=3),
+
+                # Selection
+                "parent_selection_method": config.get("Selection", "parent_selection_method", fallback="tournament"),
+                "tournament_size": config.getint("Selection", "tournament_size", fallback=3),
+
+                # Agents
+                "num_agents": config.getint("Agents", "num_agents", fallback=4),
+                "enforce_agent_diversity": config.getboolean("Agents", "enforce_agent_diversity", fallback=True),
+
+                # Evaluation
+                "batch_size": config.getint("Evaluation", "batch_size", fallback=20),
+
+                # Output
+                "top_k_ideas": config.getint("Output", "top_k_ideas", fallback=5),
+                "generate_presentation": config.getboolean("Output", "generate_presentation", fallback=True),
+            }
+
+            # Validate reproduction ratios
+            total_ratio = params["mutation_ratio"] + params["crossover_ratio"] + params["fresh_ratio"]
+            if not (0.99 <= total_ratio <= 1.01):  # Allow small floating point error
+                print(f"⚠️  Warning: Reproduction ratios sum to {total_ratio:.3f}, should be 1.0")
+                print("   Normalizing ratios...")
+                params["mutation_ratio"] /= total_ratio
+                params["crossover_ratio"] /= total_ratio
+                params["fresh_ratio"] /= total_ratio
+
+            cls.EVOLUTIONARY_PARAMS = params
+            return params
+
+        except Exception as e:
+            print(f"⚠️  Error loading parameters from {params_file}: {e}")
+            print("   Using default parameters.")
+            return cls._get_default_evolutionary_parameters()
+
+    @classmethod
+    def _get_default_evolutionary_parameters(cls) -> Dict[str, Any]:
+        """Get default evolutionary parameters."""
+        params = {
+            "initial_population_size": 20,
+            "max_population_size": 20,
+            "elite_ratio": 0.20,
+            "mutation_ratio": 0.70,
+            "crossover_ratio": 0.20,
+            "fresh_ratio": 0.10,
+            "max_generations": 10,
+            "num_reflections": 3,
+            "parent_selection_method": "tournament",
+            "tournament_size": 3,
+            "num_agents": 4,
+            "enforce_agent_diversity": True,
+            "batch_size": 20,
+            "top_k_ideas": 5,
+            "generate_presentation": True,
+        }
+        cls.EVOLUTIONARY_PARAMS = params
+        return params
 
     @classmethod
     def get_active_agents(cls) -> List[int]:

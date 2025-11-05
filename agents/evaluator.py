@@ -22,9 +22,30 @@ def get_llm(temperature: float = 0.3, model: str = None):
     return ChatGoogleGenerativeAI(model=model, temperature=temperature, google_api_key=api_key)
 
 
+def validate_score(score: int) -> int:
+    """
+    Validate that score is in valid range 1-5.
+
+    Args:
+        score: Raw score value
+
+    Returns:
+        Validated score (clamped to 1-5)
+    """
+    if score < 1:
+        print(f"  [Validator] ⚠️ Score {score} below minimum, clamping to 1")
+        return 1
+    elif score > 5:
+        print(f"  [Validator] ⚠️ Score {score} above maximum, clamping to 5")
+        return 5
+    return score
+
+
 def parse_evaluation_response(response_text: str) -> List[Dict]:
     """
-    Parse evaluation response in format:
+    Parse evaluation response with multiple fallback strategies.
+
+    Expected format:
     Agent X: score/5 | Confidence: High/Medium/Low | Justification: ...
 
     Returns:
@@ -32,37 +53,193 @@ def parse_evaluation_response(response_text: str) -> List[Dict]:
     """
     results = []
 
-    # Pattern to match the format
-    pattern = r"Agent (\d+):\s*(\d+)/5\s*\|\s*Confidence:\s*(High|Medium|Low)\s*\|\s*Justification:\s*(.+?)(?=Agent \d+:|$)"
+    # Strategy 1: Full pattern with all fields (most robust)
+    # Matches: Agent 1: 4/5 | Confidence: High | Justification: text...
+    full_pattern = r"Agent\s+(\d+)\s*:\s*(\d+)\s*/\s*5\s*\|\s*Confidence\s*:\s*(High|Medium|Low)\s*\|\s*Justification\s*:\s*(.+?)(?=(?:Agent\s+\d+\s*:|$))"
 
-    matches = re.finditer(pattern, response_text, re.DOTALL | re.IGNORECASE)
+    matches = list(re.finditer(full_pattern, response_text, re.DOTALL | re.IGNORECASE))
+
+    if matches:
+        print(f"  [Parser] Strategy 1: Found {len(matches)} evaluations using full pattern")
+        for match in matches:
+            agent_id = int(match.group(1))
+            score = int(match.group(2))
+            confidence = match.group(3).strip().capitalize()  # Normalize case
+            justification = match.group(4).strip()
+
+            # Validate score range
+            score = validate_score(score)
+
+            # Clean justification (remove extra whitespace, newlines)
+            justification = ' '.join(justification.split())
+
+            results.append({
+                "agent_id": agent_id,
+                "score": score,
+                "confidence": confidence,
+                "justification": justification
+            })
+        return results
+
+    # Strategy 2: Pattern without case-sensitive confidence
+    # More flexible for confidence field
+    pattern2 = r"Agent\s+(\d+)\s*:\s*(\d+)\s*/\s*5\s*\|\s*Confidence\s*:\s*(\w+)\s*\|\s*Justification\s*:\s*(.+?)(?=(?:Agent\s+\d+\s*:|$))"
+
+    matches = list(re.finditer(pattern2, response_text, re.DOTALL | re.IGNORECASE))
+
+    if matches:
+        print(f"  [Parser] Strategy 2: Found {len(matches)} evaluations using flexible pattern")
+        for match in matches:
+            agent_id = int(match.group(1))
+            score = validate_score(int(match.group(2)))
+            confidence_raw = match.group(3).strip().capitalize()
+
+            # Normalize confidence to valid values
+            confidence = normalize_confidence(confidence_raw)
+
+            justification = match.group(4).strip()
+            justification = ' '.join(justification.split())
+
+            results.append({
+                "agent_id": agent_id,
+                "score": score,
+                "confidence": confidence,
+                "justification": justification
+            })
+        return results
+
+    # Strategy 3: Split by lines and parse each line
+    # Handles multiline justifications better
+    lines = response_text.split('\n')
+    current_agent_data = None
+
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
+        # Check if line starts with "Agent X:"
+        agent_match = re.match(r"Agent\s+(\d+)\s*:\s*(.+)", line, re.IGNORECASE)
+        if agent_match:
+            # Save previous agent if exists
+            if current_agent_data:
+                results.append(current_agent_data)
+
+            agent_id = int(agent_match.group(1))
+            rest = agent_match.group(2)
+
+            # Try to parse the rest
+            score_match = re.search(r"(\d+)\s*/\s*5", rest)
+            conf_match = re.search(r"Confidence\s*:\s*(\w+)", rest, re.IGNORECASE)
+            just_match = re.search(r"Justification\s*:\s*(.+)", rest, re.IGNORECASE)
+
+            score = validate_score(int(score_match.group(1))) if score_match else 3  # Default to 3
+            confidence = normalize_confidence(conf_match.group(1)) if conf_match else "Medium"
+            justification = just_match.group(1).strip() if just_match else "No justification provided"
+
+            current_agent_data = {
+                "agent_id": agent_id,
+                "score": score,
+                "confidence": confidence,
+                "justification": justification
+            }
+        elif current_agent_data:
+            # Continuation of justification
+            current_agent_data["justification"] += " " + line
+
+    # Save last agent
+    if current_agent_data:
+        results.append(current_agent_data)
+
+    if results:
+        print(f"  [Parser] Strategy 3: Found {len(results)} evaluations using line-by-line parsing")
+        return results
+
+    # Strategy 4: Minimal pattern - just score
+    # Last resort fallback
+    print("  [Parser] ⚠️ Warning: Using Strategy 4 (minimal parsing)")
+    simple_pattern = r"Agent\s+(\d+)\s*:\s*(\d+)\s*/\s*5"
+    matches = re.finditer(simple_pattern, response_text, re.IGNORECASE)
 
     for match in matches:
-        agent_id = int(match.group(1))
-        score = int(match.group(2))
-        confidence = match.group(3).strip()
-        justification = match.group(4).strip()
-
         results.append({
-            "agent_id": agent_id,
-            "score": score,
-            "confidence": confidence,
-            "justification": justification
+            "agent_id": int(match.group(1)),
+            "score": validate_score(int(match.group(2))),
+            "confidence": "Medium",
+            "justification": "Could not parse full justification - minimal parsing used"
         })
 
-    # If parsing failed, try fallback simpler pattern
-    if not results:
-        simple_pattern = r"Agent (\d+):\s*(\d+)/5"
-        matches = re.finditer(simple_pattern, response_text)
-        for match in matches:
-            results.append({
-                "agent_id": int(match.group(1)),
-                "score": int(match.group(2)),
-                "confidence": "Medium",
-                "justification": "Could not parse justification"
+    if results:
+        print(f"  [Parser] Strategy 4: Found {len(results)} evaluations (minimal data)")
+        return results
+
+    # If all strategies failed
+    print("  [Parser] ❌ ERROR: All parsing strategies failed!")
+    print(f"  [Parser] Response preview: {response_text[:500]}...")
+    return []
+
+
+def normalize_confidence(confidence_str: str) -> str:
+    """
+    Normalize confidence string to High/Medium/Low.
+
+    Args:
+        confidence_str: Raw confidence string
+
+    Returns:
+        Normalized confidence: "High", "Medium", or "Low"
+    """
+    conf_lower = confidence_str.lower().strip()
+
+    if conf_lower in ["high", "strong", "very confident", "certain"]:
+        return "High"
+    elif conf_lower in ["low", "weak", "uncertain", "unsure"]:
+        return "Low"
+    else:
+        return "Medium"
+
+
+def validate_and_fill_evaluations(
+    parsed_scores: List[Dict],
+    expected_agent_ids: List[int],
+    aspect_name: str
+) -> List[Dict]:
+    """
+    Validate that all expected agents are evaluated and fill missing ones.
+
+    Args:
+        parsed_scores: List of parsed score dictionaries
+        expected_agent_ids: List of agent IDs that should be evaluated
+        aspect_name: Name of the aspect being evaluated
+
+    Returns:
+        Complete list of evaluations with all agents
+    """
+    # Get IDs that were successfully parsed
+    parsed_agent_ids = {score['agent_id'] for score in parsed_scores}
+
+    # Find missing agents
+    missing_agent_ids = set(expected_agent_ids) - parsed_agent_ids
+
+    if missing_agent_ids:
+        print(f"  [Validator] ⚠️ Warning: Missing evaluations for agents {sorted(missing_agent_ids)} in aspect '{aspect_name}'")
+        print(f"  [Validator] Adding default scores for missing agents...")
+
+        # Add default evaluations for missing agents
+        for agent_id in missing_agent_ids:
+            parsed_scores.append({
+                "agent_id": agent_id,
+                "score": 3,  # Default to middle score
+                "confidence": "Low",
+                "justification": f"[Auto-generated] Evaluation missing from LLM response for aspect '{aspect_name}'. Defaulted to neutral score."
             })
 
-    return results
+    # Sort by agent_id for consistency
+    parsed_scores.sort(key=lambda x: x['agent_id'])
+
+    print(f"  [Validator] ✓ Validated {len(parsed_scores)} evaluations for {len(expected_agent_ids)} agents")
+
+    return parsed_scores
 
 
 def evaluate_ideas(state: Dict) -> List[Dict]:
@@ -92,14 +269,18 @@ def evaluate_ideas(state: Dict) -> List[Dict]:
 
     # Prepare agent summaries (use final ideas)
     agent_summaries = []
+    expected_agent_ids = []
     for idea in agent_ideas:
         agent_id = idea.get("agent_id", "Unknown")
+        expected_agent_ids.append(agent_id)
         final_idea = idea.get("final_idea", idea.get("initial_idea", "No idea provided"))
-        # Truncate for token management
+        # IMPORTANT: NO TRUNCATION - Algorithm proposals must be complete
         agent_summaries.append({
             "agent_id": agent_id,
-            "summary": final_idea[:1500]
+            "summary": final_idea  # Full content, no truncation
         })
+
+    print(f"[Evaluator] Expected agent IDs: {expected_agent_ids}")
 
     # Evaluate each aspect
     for aspect in aspects:
@@ -127,6 +308,13 @@ def evaluate_ideas(state: Dict) -> List[Dict]:
         # Parse the structured response
         parsed_scores = parse_evaluation_response(evaluation_result)
 
+        # Validate and fill missing evaluations
+        parsed_scores = validate_and_fill_evaluations(
+            parsed_scores,
+            expected_agent_ids,
+            aspect['name']
+        )
+
         evaluations.append({
             "aspect": aspect['name'],
             "description": aspect['description'],
@@ -135,7 +323,8 @@ def evaluate_ideas(state: Dict) -> List[Dict]:
             "parsed_scores": parsed_scores
         })
 
-    print(f"[Evaluator] Completed evaluation across {len(aspects)} aspects")
+    print(f"\n[Evaluator] ✓ Completed evaluation across {len(aspects)} aspects")
+    print(f"[Evaluator] ✓ All {len(expected_agent_ids)} agents evaluated for all aspects")
 
     return evaluations
 

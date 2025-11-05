@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(mkdir:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(if [ -f cvrp_research.txt ])",
+      "Bash(then head -20 cvrp_research.txt)",
+      "Bash(else echo \"File not found\")",
+      "Bash(fi)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []
